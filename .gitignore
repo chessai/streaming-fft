@@ -1,0 +1,9 @@
+timestamps/ts.txt
+run
+result*
+dist*
+stack.yaml
+.stack-work
+*.ghc*
+*.sw*
+*.local
