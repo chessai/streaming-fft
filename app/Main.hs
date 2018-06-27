@@ -25,7 +25,7 @@ sigSize, binSize :: Int
 -- | Each signal contains 'sigSize' number of bins
 sigSize = 10
 -- | Each bin contains 'binSize' number of 1d datapoints
-binSize = 10
+binSize = 1000
 
 thresholdSize :: Double
 thresholdSize = 1
@@ -40,5 +40,6 @@ main = do
       k = readFile streamFP 
       timestamps :: MonadResource m => S.Stream (S.Of Double) m () 
       timestamps = S.map stringToNum k
-       
+  
+  runResourceT $ S.print $ streamFFTDebug thr bin sig timestamps
   runResourceT $ S.print $ streamFFT thr bin sig timestamps
