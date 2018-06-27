@@ -2,6 +2,10 @@
 
 {-# OPTIONS_GHC -O2 #-}
 
+
+-- There is also, in bash:
+--
+-- for i in `seq 1000`; do  shuf -i 1-100000 -n 1; done | sort -n > timestamps/ts.txt
 module Main (main) where
 
 import System.IO

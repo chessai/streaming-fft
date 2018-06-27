@@ -71,29 +71,6 @@ internal_ :: PrimBase m => m () -> State# (PrimState m) -> State# (PrimState m)
 internal_ m s = case internal m s of
   (# s', () #) -> s'
 
-slidingBounds' :: forall a m b. (Prim a, PrimMonad m)
-  => Int
-  -> Stream (Of a) m b
-  -> Stream (Of (MutablePrimArray (PrimState m) a)) m b
-slidingBounds' !n' stream = Effect $ do
-  let !n = max n' 1
-  marr <- newPrimArray n 
-  let go1 :: Int -> Stream (Of a) m b -> Stream (Of (MutablePrimArray (PrimState m) a)) m b
-      go1 !ix s1 = case s1 of
-        Return r -> Return r
-        Effect m -> Effect (fmap (go1 ix) m)
-        Step (a :> s2) -> if ix < n - 1
-          then Effect (writePrimArray marr ix a >> return (go1 (ix + 1) s2))
-          else Effect (writePrimArray marr ix a >> return (go2 0 s2))
-      go2 :: Int -> Stream (Of a) m b -> Stream (Of (MutablePrimArray (PrimState m) a)) m b
-      go2 !ix s1 = case s1 of
-        Return r -> Return r
-        Effect m -> Effect (fmap (go2 ix) m)
-        Step (new :> s2) -> Effect $ do
-          !old <- readPrimArray marr ix
-          writePrimArray marr ix new
-          return (Step (marr :> go2 (rem (ix + 1) n) s2))
-
-  return (go1 0 stream)
-  
- 
+-- | This is a dirty, dirty hack and you know it.
+instance Ord e => Ord (Complex e) where
+  compare (a :+ b) (a' :+ b') = compare b b'

@@ -20,6 +20,7 @@ with pkgs.haskell.lib;
   llvm-hs = self.callHackage "llvm-hs" "6.2.0" { llvm-config = pkgs.llvm_6; };
 
   primitive = dontBenchmark (dontHaddock (dontCheck (self.callPackage ./deps/primitive.nix {})));
+  primitive-median = dontBenchmark (dontHaddock (dontCheck (self.callPackage ./deps/primitive-median.nix {})));
   primitive-indexed = dontCheck (self.callPackage ./deps/primitive-indexed.nix {});
   primitive-checked = doJailbreak (self.callPackage ./deps/primitive-checked.nix {});
 

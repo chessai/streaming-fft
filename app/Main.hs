@@ -23,9 +23,9 @@ streamFP = "timestamps/ts.txt"
 
 sigSize, binSize :: Int
 -- | Each signal contains 'sigSize' number of bins
-sigSize = 100
+sigSize = 10
 -- | Each bin contains 'binSize' number of 1d datapoints
-binSize = 100
+binSize = 10
 
 thresholdSize :: Double
 thresholdSize = 1

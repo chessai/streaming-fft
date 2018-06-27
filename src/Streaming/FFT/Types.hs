@@ -39,18 +39,25 @@ undefined = error "Prelude.undefined"
 -- | information from FFT
 data Info e where
   Empty     :: Info e
+  Anomaly   :: Info e 
   Anomalies :: Int -> Info e
 
 instance Semigroup (Info e) where
   Empty <> Empty = Empty
+  Empty <> Anomaly = Anomaly 
   Empty <> Anomalies x = Anomalies x
+  Anomaly <> Empty = Anomaly
+  Anomaly <> Anomaly = Anomalies 2
+  Anomaly <> Anomalies y = Anomalies (y + 1)
+  Anomalies x <> Anomaly = Anomalies (x + 1) 
   Anomalies x <> Empty = Anomalies x
   Anomalies x <> Anomalies y = Anomalies (x + y)
   {-# INLINE (<>) #-}
 
 instance Show e => Show (Info e) where
   show Empty = "0 Anomalies"
-  show (Anomalies x) = show x ++ " Anomalies"
+  show Anomaly = "Anomaly detected"
+  show (Anomalies x) = show x ++ " Anomalies detected"
 
 -- | FIXME: doc
 newtype AccWindow e = AccWindow

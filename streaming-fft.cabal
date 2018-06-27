@@ -34,6 +34,7 @@ library
     , mtl 
     , primitive 
 --    , primitive-checked
+    , primitive-median 
     , resourcet 
     , streaming
     , transformers
@@ -44,7 +45,6 @@ executable make-timestamps
   main-is: Timestamps.hs
   build-depends:
       base >= 4.9 && < 5.0
-    , mersenne-random-pure64
     , random
     , streaming-fft
   hs-source-dirs: app
