@@ -17,7 +17,7 @@ module Streaming.FFT.FFT
 
 import Prelude
   ( RealFloat
-  , Floating
+  , Floating(..)
   , (**)
   , Int
   , mod
@@ -33,73 +33,89 @@ import Data.Function (($))
 import Data.Functor (Functor(fmap))
 import Data.Ord (Ord(..))
 import Data.Primitive.PrimArray
-import Data.Primitive.PrimArray.Median (median)
 import Data.Primitive.Types
 import Data.Semigroup (Semigroup((<>)))
 import Data.String (String)
-import Data.Tuple (snd)
 import GHC.Classes (modInt#)
 import GHC.Num (Num(..))
-import GHC.Real (fromIntegral, RealFrac(..), Fractional(..), (/))
-import GHC.Show (show)
+import GHC.Real (fromIntegral, (/))
+import GHC.Show (Show(..))
 import GHC.Types (Int(..))
 import Streaming.FFT.Internal.Accelerate (initialDFT, subDFT, updateWindow, mkComplex, getY)
 import Streaming.FFT.Internal.Streaming
 import Streaming.FFT.Types (Window(..), Transform(..), Signal(..), Info(..), Bin(..), Threshold(..))
-import Streaming.FFT.Types (undefined)
 import Streaming (lift)
 import Streaming.Prelude (next, yield)
 import qualified Streaming.FFT.Internal.Accelerate as SA
 
-extract :: forall m e. (Ord e, RealFloat e, Prim e, PrimMonad m)
+--import Streaming.FFT.Types (undefined)
+import Debug.Trace
+
+extract :: forall m e. (Ord e, RealFloat e, Prim e, PrimMonad m, Show e)
   => Threshold e
   -> Transform m e
   -> m (Info e)
 extract (Threshold !t) (Transform !mpa) = do
-  let !l = sizeofMutablePrimArray mpa
+  let !l = sizeofMutablePrimArray mpa 
       go :: Int -> m (Info e)
       go !ix = if ix < l
         then do
-          !atIx <- readPrimArray mpa ix
-          if getY atIx > t
-            then return $ Debug (getY atIx) --fmap (Anomaly <>) (go (ix + 1))
-            else return $ Debug (getY atIx) --Empty
+          !atIx@(s_r :+ s_i) <- readPrimArray mpa ix
+          if s_i > t
+            then fmap (Anomaly <>) (go (ix + 1))
+            else go (ix + 1)
         else return Empty
-
-  -- !_ <- removeGaussian mpa
+  
+--  !_ <- removeGaussian mpa
   go 0
 
-removeGaussian :: forall m e. (Floating e, Prim e, PrimMonad m)
-  => MutablePrimArray (PrimState m) e
+removeGaussian :: forall m e. (RealFloat e, Prim e, PrimMonad m)
+  => MutablePrimArray (PrimState m) (Complex e)
   -> m ()
 removeGaussian !mpa = do
-  !g_mean <- gmean mpa
-
+  !g_mean@(g_r :+ g_i) <- gmean mpa
   let !l = sizeofMutablePrimArray mpa
       go :: Int -> m ()
       go !ix = if ix < l
         then do
-         !atIx <- readPrimArray mpa ix
-         !_ <- writePrimArray mpa ix (abs (atIx - g_mean))
+         !atIx@(s_r :+ s_i) <- readPrimArray mpa ix
+         let !absd = (s_r - g_r) :+ abs (s_i - g_i)
+         !_ <- writePrimArray mpa ix absd --(atIx - g_mean)
          go (ix + 1)
         else return ()
   go 0
 
-gmean :: forall m e. (Prim e, PrimMonad m, Floating e)
-      => MutablePrimArray (PrimState m) e
-      -> m e
+amean :: forall m e. (Prim e, PrimMonad m, RealFloat e)
+      => MutablePrimArray (PrimState m) (Complex e)
+      -> m (Complex e)
+amean !mpa = do
+  let !l = sizeofMutablePrimArray mpa
+      go :: Int -> Complex e -> m (Complex e)
+      go !ix acc = if ix < l
+        then do
+          !atIx <- readPrimArray mpa ix
+          go (ix + 1) (acc + atIx)
+        else return acc
+  !t <- go 0 0
+ 
+  return (t / (fromIntegral l :: Complex e))
+
+gmean :: forall m e. (Prim e, PrimMonad m, RealFloat e)
+      => MutablePrimArray (PrimState m) (Complex e)
+      -> m (Complex e)
 gmean !mpa = do
   let !l = sizeofMutablePrimArray mpa
-      go :: Int -> e -> m e
+      go :: Int -> Complex e -> m (Complex e)
       go !ix acc = if ix < l
         then do
           !atIx <- readPrimArray mpa ix
           go (ix + 1) (acc * atIx)
         else return acc
   !t <- go 0 1
-  let !p = 1 / (fromIntegral l :: e)
+  
+  let !p = mkComplex (fromIntegral l :: e) 0
 
-  return (t ** p)
+  return (t ** (1 / p))
 
 binDepleted :: forall e. (Num e, Ord e)
              => Bin e

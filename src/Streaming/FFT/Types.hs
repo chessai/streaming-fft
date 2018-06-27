@@ -21,16 +21,24 @@ module Streaming.FFT.Types
   , Transform(..)
   , Window(..)
   , Threshold(..)
+  , Ratio(..) 
+  , Rational
+
 
     -- * Debugging
   , undefined
   ) where
 
-import Prelude hiding (undefined)
+import Prelude hiding (undefined, Rational)
 import Control.Monad.Primitive
 import Data.Primitive.PrimArray
 import Data.Array.Accelerate hiding (undefined, (++))
 import Data.Array.Accelerate.Data.Complex
+
+data Ratio a = R { numerator :: !a, denominator :: !a }
+  deriving (Prelude.Eq, Prelude.Ord, Show)
+
+type Rational = Ratio Integer
 
 {-# WARNING undefined "'undefined' remains in code" #-}
 undefined :: a
@@ -41,7 +49,7 @@ data Info e where
   Empty     :: Info e
   Anomaly   :: Info e 
   Anomalies :: Int -> Info e
-  Debug     :: e   -> Info e
+  DebugC    :: Complex e -> Info e
 
 instance Semigroup (Info e) where
   Empty <> Empty = Empty
@@ -53,16 +61,16 @@ instance Semigroup (Info e) where
   Anomalies x <> Anomaly = Anomalies (x + 1) 
   Anomalies x <> Empty = Anomalies x
   Anomalies x <> Anomalies y = Anomalies (x + y)
-  Debug _ <> Debug _ = Empty
-  Debug _ <> y = y
-  x <> Debug _ = x
+  DebugC _ <> DebugC _ = Empty
+  DebugC _ <> y = y
+  x <> DebugC _ = x
   {-# INLINE (<>) #-}
 
 instance Show e => Show (Info e) where
   show Empty = "0 Anomalies"
   show Anomaly = "Anomaly detected"
   show (Anomalies x) = show x ++ " Anomalies detected"
-  show (Debug e) = show e
+  show (DebugC c) = show c
 
 -- | FIXME: doc
 newtype AccWindow e = AccWindow
