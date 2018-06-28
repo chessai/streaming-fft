@@ -49,7 +49,6 @@ data Info e where
   Empty     :: Info e
   Anomaly   :: Info e 
   Anomalies :: Int -> Info e
-  DebugC    :: Complex e -> Info e
 
 instance Semigroup (Info e) where
   Empty <> Empty = Empty
@@ -61,16 +60,12 @@ instance Semigroup (Info e) where
   Anomalies x <> Anomaly = Anomalies (x + 1) 
   Anomalies x <> Empty = Anomalies x
   Anomalies x <> Anomalies y = Anomalies (x + y)
-  DebugC _ <> DebugC _ = Empty
-  DebugC _ <> y = y
-  x <> DebugC _ = x
   {-# INLINE (<>) #-}
 
 instance Show e => Show (Info e) where
   show Empty = "0 Anomalies"
   show Anomaly = "Anomaly detected"
   show (Anomalies x) = show x ++ " Anomalies detected"
-  show (DebugC c) = show c
 
 -- | FIXME: doc
 newtype AccWindow e = AccWindow
@@ -93,5 +88,5 @@ newtype Signal e = Signal Int
 newtype Shift  e = Shift  Int
 newtype Bin    e = Bin    Int
 
-newtype Threshold e = Threshold e
+newtype Threshold e = Threshold (Complex e)
 

@@ -41,7 +41,7 @@ import GHC.Num (Num(..))
 import GHC.Real (fromIntegral, (/))
 import GHC.Show (Show(..))
 import GHC.Types (Int(..))
-import Streaming.FFT.Internal.Accelerate (initialDFT, subDFT, updateWindow, mkComplex, getY)
+import Streaming.FFT.Internal.Accelerate (initialDFT, subDFT, updateWindow, mkComplex)
 import Streaming.FFT.Internal.Streaming
 import Streaming.FFT.Types (Window(..), Transform(..), Signal(..), Info(..), Bin(..), Threshold(..))
 import Streaming (lift)
@@ -56,35 +56,42 @@ extract :: forall m e. (Ord e, RealFloat e, Prim e, PrimMonad m, Show e)
   -> Transform m e
   -> m (Info e)
 extract (Threshold !t) (Transform !mpa) = do
-  let !l = sizeofMutablePrimArray mpa 
+  let !l = sizeofMutablePrimArray mpa
       go :: Int -> m (Info e)
       go !ix = if ix < l
         then do
-          !atIx@(s_r :+ s_i) <- readPrimArray mpa ix
-          if s_i > t
+          !atIx <- readPrimArray mpa ix
+          let !absAtIx = abs atIx
+          traceM ("ABS_AT_IX: " <> show absAtIx)
+          traceM ("THRESHOLD: " <> show t)
+          if gtR absAtIx t
             then fmap (Anomaly <>) (go (ix + 1))
             else go (ix + 1)
         else return Empty
   
---  !_ <- removeGaussian mpa
+  !_ <- removeGaussian mpa
   go 0
 
-removeGaussian :: forall m e. (RealFloat e, Prim e, PrimMonad m)
+gtR :: Ord a => Complex a -> Complex a -> Bool
+gtR (a :+ _) (a' :+ _) = a > a'
+
+removeGaussian :: forall m e. (RealFloat e, Prim e, PrimMonad m, Show e)
   => MutablePrimArray (PrimState m) (Complex e)
   -> m ()
 removeGaussian !mpa = do
-  !g_mean@(g_r :+ g_i) <- gmean mpa
+  !g_mean <- gmean mpa
+  traceM ("GMEAN: " <> show (abs g_mean))
   let !l = sizeofMutablePrimArray mpa
       go :: Int -> m ()
       go !ix = if ix < l
         then do
-         !atIx@(s_r :+ s_i) <- readPrimArray mpa ix
-         let !absd = (s_r - g_r) :+ abs (s_i - g_i)
-         !_ <- writePrimArray mpa ix absd --(atIx - g_mean)
+         !atIx <- readPrimArray mpa ix
+         !_ <- writePrimArray mpa ix (atIx - (abs g_mean))
          go (ix + 1)
         else return ()
   go 0
 
+{-
 amean :: forall m e. (Prim e, PrimMonad m, RealFloat e)
       => MutablePrimArray (PrimState m) (Complex e)
       -> m (Complex e)
@@ -99,6 +106,7 @@ amean !mpa = do
   !t <- go 0 0
  
   return (t / (fromIntegral l :: Complex e))
+-}
 
 gmean :: forall m e. (Prim e, PrimMonad m, RealFloat e)
       => MutablePrimArray (PrimState m) (Complex e)
@@ -108,13 +116,11 @@ gmean !mpa = do
       go :: Int -> Complex e -> m (Complex e)
       go !ix acc = if ix < l
         then do
-          !atIx <- readPrimArray mpa ix
+          !atIx@(s_r :+ s_i) <- readPrimArray mpa ix
           go (ix + 1) (acc * atIx)
         else return acc
   !t <- go 0 1
-  
   let !p = mkComplex (fromIntegral l :: e) 0
-
   return (t ** (1 / p))
 
 binDepleted :: forall e. (Num e, Ord e)
@@ -131,7 +137,7 @@ streamFFTDebug :: forall m e b. (Prim e, SA.RealFloat e, SA.Elt (Complex e), SA.
   -> Stream (Of e) m b -- ^ input stream
   -> Stream (Of String) m () -- ^ output stream
 
-streamFFTDebug _ b@(Bin binSize) s@(Signal sigSize) strm = do
+streamFFTDebug _ b@(Bin binSize) (Signal sigSize) strm = do
   mpaW :: MutablePrimArray (PrimState m) (Complex e) <- lift $ newPrimArray sigSize -- window mprimarray
   
   let loadInitial

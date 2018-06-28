@@ -70,7 +70,3 @@ instance Prim e => Prim (Complex e) where
 internal_ :: PrimBase m => m () -> State# (PrimState m) -> State# (PrimState m)
 internal_ m s = case internal m s of
   (# s', () #) -> s'
-
--- | This is a dirty, dirty hack and you know it.
-instance Ord e => Ord (Complex e) where
-  compare (a :+ b) (a' :+ b') = compare b b'

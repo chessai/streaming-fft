@@ -5,14 +5,15 @@
 
 module Main (main) where
 
+import Control.Monad.Trans.Resource (MonadResource, runResourceT)
+import Data.Complex (Complex(..))
 import Prelude hiding (readFile)
-import Streaming.FFT.Types
 import Streaming.FFT
 import Streaming.FFT.Internal.Streaming (readFile)
+import Streaming.FFT.Types
+import Text.Read (readMaybe)
 import qualified Streaming as S
 import qualified Streaming.Prelude as S
-import Text.Read (readMaybe)
-import Control.Monad.Trans.Resource (MonadResource, runResourceT)
 
 stringToNum :: (Num a, Read a) => String -> a
 stringToNum s = maybe 0 id (readMaybe s)
@@ -21,14 +22,15 @@ stringToNum s = maybe 0 id (readMaybe s)
 streamFP :: FilePath
 streamFP = "timestamps/ts.txt"
 
+ok :: Int; ok = 10000;
 sigSize, binSize :: Int
 -- | Each signal contains 'sigSize' number of bins
-sigSize = 10
+sigSize = 50
 -- | Each bin contains 'binSize' number of 1d datapoints
-binSize = 1000
+binSize = ok `div` sigSize
 
-thresholdSize :: Double
-thresholdSize = 1
+thresholdSize :: Complex Double
+thresholdSize = 15000 :+ 0
 
 bin :: Bin Double; bin = Bin binSize
 sig :: Signal Double; sig = Signal sigSize
