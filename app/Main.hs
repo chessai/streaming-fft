@@ -20,17 +20,17 @@ stringToNum s = maybe 0 id (readMaybe s)
 {-# INLINE stringToNum #-}
 
 streamFP :: FilePath
-streamFP = "timestamps/ts.txt"
+streamFP = "timestamps/ts1.txt"
 
 ok :: Int; ok = 10000;
 sigSize, binSize :: Int
 -- | Each signal contains 'sigSize' number of bins
-sigSize = 50
+sigSize = 25
 -- | Each bin contains 'binSize' number of 1d datapoints
 binSize = ok `div` sigSize
 
 thresholdSize :: Complex Double
-thresholdSize = 15000 :+ 0
+thresholdSize = 0 :+ 0
 
 bin :: Bin Double; bin = Bin binSize
 sig :: Signal Double; sig = Signal sigSize
@@ -43,5 +43,5 @@ main = do
       timestamps :: MonadResource m => S.Stream (S.Of Double) m () 
       timestamps = S.map stringToNum k
   
-  runResourceT $ S.print $ streamFFTDebug thr bin sig timestamps
+  --runResourceT $ S.print $ streamFFTDebug thr bin sig timestamps
   runResourceT $ S.print $ streamFFT thr bin sig timestamps

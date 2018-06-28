@@ -1,6 +1,6 @@
 module Streaming.FFT
   ( streamFFT
-  , streamFFTDebug 
+--  , streamFFTDebug 
   ) where
 
 import Streaming.FFT.FFT

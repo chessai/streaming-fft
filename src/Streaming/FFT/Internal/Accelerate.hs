@@ -29,6 +29,7 @@ module Streaming.FFT.Internal.Accelerate
   --, rToExpComplex
   , modifyMutablePrimArray 
   , updateWindow 
+  , updateWindow'
   ) where
 
 import Prelude ()
@@ -169,6 +170,28 @@ modifyMutablePrimArray f !mpa = do
         else P.return ()
   go 0
 
+updateWindow' :: forall m e. (Prim e, PrimMonad m, P.RealFloat e)
+              => Window m e
+              -> Complex e
+              -> Int         -- ^ how many zeroed bins. for dense enough streams, this will be 0 most of the time
+              -> m ()
+updateWindow' (Window !mpa) !c !i = do
+  let !sz = sizeofMutablePrimArray mpa
+      !szm1 = sz - 1
+      go :: Int -> m ()
+      go !ix = if ix P.== szm1
+        then do
+          !_ <- writePrimArray mpa ix c
+          P.return ()
+        else if ix P.< szm1 P.&& (ix P.> szm1 P.- i)
+          then do
+            !_ <- writePrimArray mpa ix 0
+            go (ix + 1)
+          else do
+            !x <- readPrimArray mpa ix
+            !_ <- writePrimArray mpa (ix - 1) x
+            go (ix + 1)
+  go 1
 
 updateWindow :: forall m e. (Prim e, PrimMonad m)
              => Window m e
