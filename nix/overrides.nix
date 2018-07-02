@@ -23,6 +23,8 @@ with pkgs.haskell.lib;
   primitive-median = dontBenchmark (dontHaddock (dontCheck (self.callPackage ./deps/primitive-median.nix {})));
   primitive-indexed = dontCheck (self.callPackage ./deps/primitive-indexed.nix {});
   primitive-checked = doJailbreak (self.callPackage ./deps/primitive-checked.nix {});
+  contiguous = self.callPackage ./deps/contiguous.nix {};
+  contiguous-fft = self.callPackage ./deps/contiguous-fft.nix {};
 
   streaming-fft = (
     with rec {
