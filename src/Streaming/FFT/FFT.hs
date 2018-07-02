@@ -37,9 +37,8 @@ import GHC.Real (fromIntegral, (/), RealFrac(..))
 import GHC.Show (Show(..))
 import GHC.Types (Int(..))
 import Streaming.FFT.Internal.Accelerate (initialDFT, subDFT, updateWindow', mkComplex, rToComplex)
-import Streaming.FFT.Internal.Streaming
 import Streaming.FFT.Types (Window(..), Transform(..), Signal(..), Info(..), Bin(..), Threshold(..), singleton, Triple(..))
-import Streaming (lift)
+import Streaming
 import Streaming.Prelude (next, yield)
 
 --import Streaming.FFT.Types (undefined)

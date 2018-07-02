@@ -15,6 +15,8 @@ import Text.Read (readMaybe)
 import qualified Streaming as S
 import qualified Streaming.Prelude as S
 
+import Util
+
 stringToNum :: (Num a, Read a) => String -> a
 stringToNum s = maybe 0 id (readMaybe s)
 {-# INLINE stringToNum #-}
