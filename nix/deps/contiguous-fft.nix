@@ -4,8 +4,8 @@ mkDerivation {
   version = "0.1.0.0";
   src = fetchgit {
     url = "https://github.com/chessai/contiguous-fft.git";
-    sha256 = "0syc3ncijfxvlhwl28bi5gi9p4lrnxii1pf330i6yin26z3nc3hh";
-    rev = "a1dfaebea8682e72aeb1d8b0c325779dbe2e46fc";
+    sha256 = "1jlp23gy05capjv65sg6rabsy1r3db4pdbgdgyvylqsci17sm9dx";
+    rev = "f8e5c352add023236bc605f73f4684d9fd58459d";
   };
   libraryHaskellDepends = [ base contiguous ];
   homepage = "https://github.com/chessai/contiguous-fft";

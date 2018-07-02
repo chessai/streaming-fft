@@ -22,7 +22,6 @@ import Prelude
 
 import Control.Monad (Monad(return))
 import Control.Monad.Primitive
-import Data.Bool (Bool(..))
 import Data.Complex (Complex(..))
 import Data.Either (Either(..))
 import Data.Eq (Eq((==)))
@@ -32,7 +31,6 @@ import Data.Ord (Ord(..))
 import Data.Primitive.PrimArray
 import Data.Primitive.Types
 import Data.Semigroup (Semigroup((<>)))
-import Data.String (String)
 import GHC.Classes (modInt#)
 import GHC.Num (Num(..))
 import GHC.Real (fromIntegral, (/), RealFrac(..))
@@ -40,13 +38,12 @@ import GHC.Show (Show(..))
 import GHC.Types (Int(..))
 import Streaming.FFT.Internal.Accelerate (initialDFT, subDFT, updateWindow', mkComplex, rToComplex)
 import Streaming.FFT.Internal.Streaming
-import Streaming.FFT.Types (Window(..), Transform(..), Signal(..), Info(..), Bin(..), Threshold(..), Pair(..), singleton, Triple(..))
+import Streaming.FFT.Types (Window(..), Transform(..), Signal(..), Info(..), Bin(..), Threshold(..), singleton, Triple(..))
 import Streaming (lift)
 import Streaming.Prelude (next, yield)
-import qualified Streaming.FFT.Internal.Accelerate as SA
 
 --import Streaming.FFT.Types (undefined)
-import Debug.Trace
+--import Debug.Trace
 
 -- | Extract 'Info' out of a transform
 extract :: forall m e. (Ord e, RealFloat e, Prim e, PrimMonad m, Show e)
@@ -175,7 +172,7 @@ streamFFTDebug _ b@(Bin binSize) (Signal sigSize) strm = do
   loadInitial 0 0 0 0 strm
 -}
 
-streamFFT :: forall m e b. (Num e, Prim e, SA.RealFloat e, SA.Elt (Complex e), SA.FromIntegral Int e, PrimMonad m, RealFloat e)
+streamFFT :: forall m e b. (Prim e, PrimMonad m, RealFloat e, Show e) -- ^ 'Show' only used in debugging
   => Threshold e -- ^ anomaly threshold
   -> Bin e       -- ^ bin size
   -> Signal e    -- ^ signal size
