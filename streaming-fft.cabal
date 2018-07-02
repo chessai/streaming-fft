@@ -25,11 +25,9 @@ library
     Streaming.FFT.Internal.Orphan
   build-depends:
       base >=4.9 && <5.0
-    , accelerate
-    , accelerate-fft
---    , accelerate-io 
     , bytestring
     , containers 
+    , contiguous-fft 
     , ghc-prim 
     , mtl 
     , primitive 

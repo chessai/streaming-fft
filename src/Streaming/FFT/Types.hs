@@ -7,13 +7,6 @@ module Streaming.FFT.Types
     -- * FFT info 
     Info(..)
 
-    -- * Accelerate interop types
-  , AccWindow(..)
-  , AccTransform(..)
-  , AccSignal(..)
-  , AccShift(..)
-  , AccBin(..)
-
     -- * Haskell types
   , Signal(..)
   , Shift(..)
@@ -31,11 +24,10 @@ module Streaming.FFT.Types
   , undefined
   ) where
 
-import Prelude hiding (undefined, Rational)
 import Control.Monad.Primitive
+import Data.Complex
 import Data.Primitive.PrimArray
-import Data.Array.Accelerate hiding (undefined, (++))
-import Data.Array.Accelerate.Data.Complex
+import Prelude hiding (undefined, Rational)
 import qualified Data.Set as Set
 
 data Ratio a = R { numerator :: !a, denominator :: !a }
@@ -45,7 +37,6 @@ type Rational = Ratio Integer
 
 data Triple a b c = Triple !a !b !c
   deriving (Prelude.Eq, Prelude.Ord)
-
 
 data Pair a b = Pair !a !b
   deriving (Prelude.Eq, Prelude.Ord)
@@ -104,23 +95,12 @@ instance Show e => Show (Info e) where
       , show i
       ]
 
--- | FIXME: doc
-newtype AccWindow e = AccWindow
-  { getAccWindow :: Acc (Vector (Complex e)) }
-
--- | FIXME: doc
-newtype AccTransform e = AccTransform
-  { getAccTransform :: Acc (Vector (Complex e)) }
-
 newtype Window m e = Window
   { getWindow :: MutablePrimArray (PrimState m) (Complex e) }
 
 newtype Transform m e = Transform
   { getTransform :: MutablePrimArray (PrimState m) (Complex e) }
 
-newtype AccSignal e = AccSignal (Exp e)
-newtype AccShift  e = AccShift  (Exp Int)
-newtype AccBin    e = AccBin    (Exp Int)
 newtype Signal e = Signal Int
 newtype Shift  e = Shift  Int
 newtype Bin    e = Bin    Int
