@@ -30,6 +30,7 @@ library
 --    , accelerate-io 
     , bytestring
     , containers 
+    , contiguous-fft 
     , ghc-prim 
     , mtl 
     , primitive 
