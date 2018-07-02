@@ -6,24 +6,24 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UnboxedTuples       #-}
 
+{-# OPTIONS_GHC
+      -Wall
+      -fno-warn-orphans
+      -fno-warn-name-shadowing
+  #-}
+
 module Streaming.FFT.Internal.Orphan () where
 
-import Control.Applicative
 import Control.Monad.Primitive
 import Control.Monad.ST
 import Data.Complex
 import Data.Primitive.Addr
 import Data.Primitive.ByteArray
-import Data.Primitive.PrimArray
 import Data.Primitive.Types
 import GHC.Prim
 import GHC.Types
 
-import Streaming.Internal (Stream(Return,Effect,Step))
-import Streaming.Prelude (Of((:>)))
-import qualified Streaming.Prelude as SMP
-import qualified Streaming.Prelude as S
-
+-- | Orphan 'Prim' instance for 'Complex'
 instance Prim e => Prim (Complex e) where
   sizeOf# _ = 2# *# sizeOf# (undefined :: e)
   alignment# _ = alignment# (undefined :: e)

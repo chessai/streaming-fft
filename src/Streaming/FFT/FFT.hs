@@ -50,13 +50,13 @@ extract :: forall m e. (Ord e, RealFloat e, Prim e, PrimMonad m, Show e)
   => Threshold e
   -> Transform m e
   -> m (Info e)
-extract (Threshold !t@(t_r :+ t_i)) (Transform !mpa) = do
+extract (Threshold (_ :+ t_i)) (Transform !mpa) = do
   let !l = sizeofMutablePrimArray mpa
       go :: Int -> m (Info e)
       -- make this tail recursive 
       go !ix = if ix < l
         then do
-          !atIx@(s_r :+ s_i) <- readPrimArray mpa ix
+          !(_ :+ s_i) <- readPrimArray mpa ix
           --traceM ("S_I: " <> show s_i)
           if s_i > t_i
             then fmap (Anomaly (Triple (s_i, ix) (singleton ix) 1) <>) (go (ix + 1))
@@ -112,7 +112,7 @@ gmean !mpa = do
       go :: Int -> Complex e -> m (Complex e)
       go !ix acc = if ix < l
         then do
-          !atIx@(s_r :+ s_i) <- readPrimArray mpa ix
+          !atIx <- readPrimArray mpa ix
           go (ix + 1) (acc * atIx)
         else return acc
   !t <- go 0 1

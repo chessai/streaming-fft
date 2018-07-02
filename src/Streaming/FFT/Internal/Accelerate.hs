@@ -9,12 +9,15 @@
 
 {-# OPTIONS_GHC -Wall -fwarn-redundant-constraints #-}
 
+-- | FIXME: doc
+--   FIXME: name
 module Streaming.FFT.Internal.Accelerate
   ( initialDFT
   , subDFT
 
     -- * some stuff (???)
   , rToComplex
+  , iToComplex 
   , mkComplex
   , getX, getY
   
@@ -66,6 +69,12 @@ rToComplex :: P.Num e
            -> Complex e
 rToComplex e = e :+ 0
 {-# INLINE rToComplex #-}
+
+iToComplex :: P.Num e
+           => e
+           -> Complex e
+iToComplex e = 0 :+ e
+{-# INLINE iToComplex #-}
 
 initialDFT :: forall m e. (P.RealFloat e, Prim e, PrimMonad m)
   => Window m e
