@@ -17,10 +17,9 @@ cabal-version:       >=1.10
 library
   exposed-modules:
     Streaming.FFT
+    Streaming.FFT.Internal
     Streaming.FFT.Types
   other-modules:
-    Streaming.FFT.FFT
-    Streaming.FFT.Internal.Accelerate
     Streaming.FFT.Internal.Orphan
   build-depends:
       base >=4.9 && <5.0
