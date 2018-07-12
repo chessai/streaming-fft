@@ -20,7 +20,7 @@ library
     Streaming.FFT.Internal
     Streaming.FFT.Types
   other-modules:
-    Streaming.FFT.Internal.Orphan
+    Streaming.FFT.Orphan
   build-depends:
       base >=4.9 && <5.0
     , containers 

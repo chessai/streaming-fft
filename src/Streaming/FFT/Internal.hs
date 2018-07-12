@@ -37,7 +37,7 @@ import GHC.Num (Num(..))
 import GHC.Real
 import GHC.Types (Int(..))
 import Prelude ()
-import Streaming.FFT.Internal.Orphan ()
+import Streaming.FFT.Orphan ()
 import Streaming.FFT.Types
 import qualified Data.Complex as C
 import qualified Data.Primitive.Contiguous.FFT as CF

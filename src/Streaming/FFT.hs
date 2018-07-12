@@ -117,6 +117,16 @@ binDepleted (Bin binSize) old new =
     then Past (floor k)
     else NotDepleted
 
+-- [NOTE]: A drawback of the dense-stream optimisation
+-- is that we must keep track of the number of bins that
+-- we ingest that are 0. if too many are 0 w.r.t. the signal
+-- size, then we must fall back to the /O(n log n) computation
+-- until we reach another dense area of the stream. This amounts
+-- to keeping an Int around that counts the number of bins that
+-- were equal to zero, it gets incremented after each bin is finished
+-- loading. So, there should realy be two 'thereafter' functions,
+-- and 'loadInitial' should do some additional checks.
+-- This is currently not the case.
 loadInitial :: forall m e b. (Prim e, PrimMonad m, RealFloat e)
   => MutablePrimArray (PrimState m) (Complex e) -- ^ array to which we should allocate
   -> Bin e -- ^ bin size
@@ -190,7 +200,7 @@ streamFFT t b s@(Signal sigSize) strm = do
   -- Grab the first signal from the stream
   subStrm :: Stream (Of e) m b <- lift $ loadInitial mpaW b s 0 0 0 0 strm
  
-  -- Compute the transform on that stream
+  -- Compute the transform on the signal we just grabbed
   -- so we can perform our dense-stream optimisation
   !initialT <- lift $ initialDFT (Window mpaW)
 
@@ -200,7 +210,7 @@ streamFFT t b s@(Signal sigSize) strm = do
   -- Yield that information to the new stream
   !_ <- yield initialInfo
 
-  -- Now stream
+  -- Now go
   thereafter b s t 0 0 0 (Window mpaW) initialT subStrm
 
 -- | Only safe when the second argument is not 0
