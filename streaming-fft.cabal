@@ -2,8 +2,8 @@ name:                streaming-fft
 version:             0.1.0.0
 synopsis:
   online (in input and output) streaming fft algorithm
-  that uses an optimisation to reduce work from /O(n log n)/
-  to /O(n)/.
+  that uses a dense-stream optimisation to reduce work
+  from /O(n log n)/ to /O(n)/.
 homepage:            https://github.com/chessai/streaming-fft
 license:             BSD3
 license-file:        LICENSE
