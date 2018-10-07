@@ -5,7 +5,12 @@
 {-# OPTIONS_GHC -Wall #-}
 
 module Streaming.FFT
-  ( streamFFT
+  ( -- * streaming fft
+    streamFFT
+    -- * types
+  , Transform(..)
+  , Bin(..)
+  , Signal(..)
   ) where
 
 import Prelude
@@ -114,20 +119,79 @@ thereafter extract !b !s !ix !binAccum !binFirst win trans st = do
             !_ <- lift $ updateWindow' win k i
             thereafter extract b s (ix + i) 0 x win trans' rest
 
-{-# INLINABLE streamFFT #-}
-streamFFT :: forall m e b c. (Prim e, PrimMonad m, RealFloat e)
-  => (Transform m e -> m c) -- ^ extraction method
-  -> Bin e       -- ^ bin size
-  -> Signal e    -- ^ signal size
-  -> Stream (Of e) m b -- ^ input stream
+-- | 'streamFFT' is based off ideas from signal processing, with an optimisation
+--   outlined in <https://www.dsprelated.com/showarticle/776.php this blog post>.
+--   Here, I will give you an outline of how this works. The idea is that we
+--   have a stream of data, which we will divide into 'Signal's, and each 'Signal'
+--   is something for which we want to compute the DFT. Each signal is divided into
+--   'Bin's (more on this later, but you can just think of 'Bin's as a chunk of a
+--   'Signal', where all the chunks are of equal length). We treat our stream not as
+--   contiguous blocks of 'Signal's, but as overlapping 'Signal's, where each overlap
+--   is one 'Bin'-length. The motivation for the blog post is to reduce the work of
+--   this overlap; they show a way to compute the DFT of each 'Signal' subsequent
+--   to the initial in /O(n)/ time, instead of the typical /O(n log n)/ time,
+--   by abusing the overlap.
+--  
+--   Consider you would like to compute the Fourier Transform of the signal
+--   
+--     \[
+--     x_{i-n+1}, x_{i-n+2}, ..., x_{i-1}, x_{i}.
+--     \]
+--  
+--   However this means that when you receive \( x_{i+1} \), you'll be the computing
+--   the Fourier Transform of
+--   
+--     \[
+--     x_{i-n+2}, x_{i-n+3}, ..., x_{i}, x_{i+1},
+--     \]
+--   
+--   which is almost identical to the first sequence. How do we avoid extra work?
+--
+--   Assume data windows to be of length \( N \) (this corresponds to the number of
+--   'Bin's in the 'Signal'). Let
+--   the original data window be \( x_{1} \), whose first sample is \( x_{old} = x_{1}[0] \).
+--   (here, \( a[k] \) is used to denote accessing the \( (k-1)th \) element from
+--   a sequence \( a \) ). Let your new data window be denoted as \( x_{2} \), whose
+--   bins are one left-shifted version of \( x_{1} \), i.e.
+--   \( x_{2}[k] = x_{1}[k+1]\) for \(k = 0, 1, ... N - 2 \), plus a new arrived datum to
+--   position \( N - 1 \), which is denoted as \( x_{new} = x_{2}[N - 1]\).
+--
+--   The following will compute the N-point DFT, \( X_{2} \) of the new data set
+--   \( x_{2} \) from that of the already computed and stored N-point DFT
+--   \( X_{1} \) of the old data set \( x_{1} \):
+--
+--     \[
+--     X{2}[k] = e^{2 \pi i k / N} * (X{1}[k] + (x_{new} - x_{old}))
+--     \]
+--
+--  for each \( k = 0, 1, ..., N - 1 \). This updated computation of \( X{2} \)
+--  pre-computed \( X{1} \) requires \( N \) complex multiplications and \( N \)
+--  real additions. Compared to a direct N-point DFT which requires \( N log_{2}(N) \)
+--  complex multiply-accumulate operations, this is an improvement by a factor of
+--  \( log_{2}(N) \), which for example at N=1024 would translate to a speedup of
+--  about 10.
+--
+--  Another advantage of this algorithm as this it is amenable to being done in-place.
+--  `streamFFT` in fact does do this, and for that reason allocations are kept to an
+--  absolute minimum.
+--
+--
+streamFFT :: forall m a b c. (Prim a, PrimMonad m, RealFloat a)
+  => (Transform m a -> m c) -- ^ extraction method. This is a function that takes a 'Transform'
+                            --   and produces (or 'extracts') some value from it. It is used
+                            --   to produce the values in the output stream.
+  -> Bin a       -- ^ bin size
+  -> Signal a    -- ^ signal size
+  -> Stream (Of a) m b -- ^ input stream
   -> Stream (Of c) m b -- ^ output stream
+{-# INLINABLE streamFFT #-}
 streamFFT extract b s@(Signal sigSize) strm = do
   -- Allocate the one array 
-  mpaW :: MutablePrimArray (PrimState m) (Complex e) <- lift $ newPrimArray sigSize
+  mpaW <- lift $ newPrimArray sigSize
   let win = Window mpaW
   
   -- Grab the first signal from the stream
-  subStrm :: Stream (Of e) m b <- lift $ loadInitial mpaW b s 0 0 0 0 strm
+  subStrm <- lift $ loadInitial mpaW b s 0 0 0 0 strm
  
   -- Compute the transform on the signal we just grabbed
   -- so we can perform our dense-stream optimisation
@@ -146,4 +210,3 @@ streamFFT extract b s@(Signal sigSize) strm = do
 unsafeMod :: Int -> Int -> Int
 unsafeMod (I# x#) (I# y#) = I# (modInt# x# y#)
 {-# INLINE unsafeMod #-} -- this should happen anyway. trust but verify.
-
