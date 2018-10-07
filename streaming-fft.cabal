@@ -1,6 +1,7 @@
 name:                streaming-fft
 version:             0.1.0.0
-synopsis:
+synopsis:            online streaming fft
+description:
   online (in input and output) streaming fft algorithm
   that uses a dense-stream optimisation to reduce work
   from /O(n log n)/ to /O(n)/.
@@ -19,36 +20,17 @@ library
     Streaming.FFT
     Streaming.FFT.Internal
     Streaming.FFT.Types
-  other-modules:
-    Streaming.FFT.Orphan
   build-depends:
       base >=4.9 && <5.0
-    , containers 
     , contiguous-fft
     , ghc-prim 
+    , prim-instances
     , primitive 
 --    , primitive-checked
     , streaming
-  hs-source-dirs:      src
-  default-language:    Haskell2010
-
-executable make-timestamps
-  main-is: Timestamps.hs
-  build-depends:
-      base >= 4.9 && < 5.0
-    , random
-    , streaming-fft
-  hs-source-dirs: app
-  default-language: Haskell2010
-
-executable anomaly-detection
-  main-is: Main.hs
-  build-depends:
-      base >=4.9 && <5.0
-    , streaming-fft
-    , primitive
---    , primitive-checked
-    , resourcet
-    , streaming
-  hs-source-dirs:      app
-  default-language:    Haskell2010
+  hs-source-dirs:
+    src
+  default-language:
+    Haskell2010
+  ghc-options:
+    -O2

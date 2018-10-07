@@ -9,8 +9,6 @@
 
 {-# OPTIONS_GHC -Wall -fwarn-redundant-constraints #-}
 
--- | FIXME: doc
---   FIXME: name
 module Streaming.FFT.Internal
   ( initialDFT
   , subDFT
@@ -37,7 +35,7 @@ import GHC.Num (Num(..))
 import GHC.Real
 import GHC.Types (Int(..))
 import Prelude ()
-import Streaming.FFT.Orphan ()
+import Data.Primitive.Instances ()
 import Streaming.FFT.Types
 import qualified Data.Complex as C
 import qualified Data.Primitive.Contiguous.FFT as CF
