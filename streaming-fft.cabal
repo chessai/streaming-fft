@@ -1,5 +1,5 @@
 name:                streaming-fft
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            online streaming fft
 description:
   online (in input and output) streaming fft algorithm
