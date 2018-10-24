@@ -1,5 +1,4 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTSyntax #-}
 {-# LANGUAGE TypeInType #-}
 
 {-# OPTIONS_GHC -Wall #-}
@@ -13,25 +12,22 @@ module Streaming.FFT.Types
   ) where
 
 import Data.Kind (Type)
-import GHC.TypeLits
 import Control.Monad.Primitive
 import Data.Complex
 import Data.Primitive.PrimArray
 import Prelude hiding (undefined, Rational)
 
--- | FIXME: Doc
+-- | A 'Window' is a mutable primitive array of 'Complex' values,
+--   over which we compute the DFT. 
 newtype Window :: (Type -> Type) -> Type -> Type where
   Window :: MutablePrimArray (PrimState m) (Complex e) -> Window m e
 
--- | FIXME: Doc
+-- | A 'Transform' is a Mutable primitive array of 'Complex' values,
+--   the result of taking the DFT of a 'Window'.
 newtype Transform :: (Type -> Type) -> Type -> Type where
   Transform :: MutablePrimArray (PrimState m) (Complex e) -> Transform m e
 
--- | FIXME: Doc
-data Signal' (n :: Nat) = Signal'
-
--- | FIXME: Doc
-data Bin' (n :: Nat) = Bin'
-
+-- | Your signal size.
 newtype Signal e = Signal Int
+-- | Your bin size.
 newtype Bin    e = Bin    Int
