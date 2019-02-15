@@ -18,7 +18,7 @@ tested-with:
     GHC == 8.0.2
   , GHC == 8.2.2
   , GHC == 8.4.3
-  , GHC == 8.6.1
+  , GHC == 8.6.3
 
 library
   exposed-modules:
@@ -26,12 +26,13 @@ library
     Streaming.FFT.Internal
     Streaming.FFT.Types
   build-depends:
-      base >=4.9 && <5.0
-    , contiguous-fft >= 0.1.0.1 && < 0.2.0.0
-    , ghc-prim
-    , prim-instances >= 0.1.0.0 && < 0.2.0.0
-    , primitive >= 0.6.4.0 && < 0.7.0.0
-    , streaming >= 0.2.2.0 && < 0.3.0.0
+      base >=4.9 && <5
+    , contiguous-fft >= 0.2
+    , prim-instances
+    , primitive >= 0.6.4 && < 0.7
+    , streaming >= 0.2.2 && < 0.3
+    , contiguous >= 0.3
+    , semirings >= 0.3
   hs-source-dirs:
     src
   default-language:
