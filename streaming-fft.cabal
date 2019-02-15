@@ -1,5 +1,5 @@
 name:                streaming-fft
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            online streaming fft
 description:
   online (in input and output) streaming fft algorithm
@@ -14,6 +14,11 @@ category:            Data
 build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
+tested-with:
+    GHC == 8.0.2
+  , GHC == 8.2.2
+  , GHC == 8.4.3
+  , GHC == 8.6.1
 
 library
   exposed-modules:
@@ -22,12 +27,11 @@ library
     Streaming.FFT.Types
   build-depends:
       base >=4.9 && <5.0
-    , contiguous-fft
-    , ghc-prim 
-    , prim-instances
-    , primitive 
---    , primitive-checked
-    , streaming
+    , contiguous-fft >= 0.1.0.1 && < 0.2.0.0
+    , ghc-prim
+    , prim-instances >= 0.1.0.0 && < 0.2.0.0
+    , primitive >= 0.6.4.0 && < 0.7.0.0
+    , streaming >= 0.2.2.0 && < 0.3.0.0
   hs-source-dirs:
     src
   default-language:

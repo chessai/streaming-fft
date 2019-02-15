@@ -20,7 +20,8 @@ import Data.Complex
 import Data.Primitive.Instances ()
 import Prelude hiding (undefined, Rational)
 
--- | FIXME: Doc
+-- | A 'Window' is a mutable primitive array of 'Complex' values,
+--   over which we compute the DFT. 
 newtype Window :: (Type -> Type) -> Type -> Type where
   Window :: MutablePrimArray (PrimState m) (Complex e) -> Window m e
 
@@ -44,5 +45,13 @@ foldMapTransform f (Transform mpa) = do
 -- | Signal size
 newtype Signal e = Signal Int
 
--- | Bin size
+-- | A 'Transform' is a Mutable primitive array of 'Complex' values,
+--   the result of taking the DFT of a 'Window'.
+newtype Transform :: (Type -> Type) -> Type -> Type where
+  Transform :: MutablePrimArray (PrimState m) (Complex e) -> Transform m e
+
+-- | Your signal size.
+newtype Signal e = Signal Int
+
+-- | Your bin size.
 newtype Bin    e = Bin    Int
