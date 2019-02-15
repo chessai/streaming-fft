@@ -7,7 +7,7 @@
 module Streaming.FFT
   ( -- * streaming fft
     streamFFT
-    -- * types
+    -- * Types
   , Transform(..)
   , Bin(..)
   , Signal(..)
@@ -84,6 +84,9 @@ loadInitial !mpa !b s@(Signal !sigSize) !ix !binAccum !binFirst !untilSig st = i
             let !k = rToComplex (fromIntegral binAccum) :: Complex e
             !_ <- writePrimArray mpa (unsafeMod (ix - 1 + untilSig) sigSize) k :: m ()
             loadInitial mpa b s (ix + i) 0 x (untilSig + 1) rest
+{-# NOINLINE loadInitial #-}
+-- loadInitial is recursive so it won't inline anyway, but it's better to be
+-- explicit about it.
 
 thereafter :: forall m e b c. (Prim e, PrimMonad m, RealFloat e)
   => (Transform m e -> m c) -- ^ extract
@@ -118,6 +121,9 @@ thereafter extract !b !s !ix !binAccum !binFirst win trans st = do
             -- algorithm.
             !_ <- lift $ updateWindow' win k i
             thereafter extract b s (ix + i) 0 x win trans' rest
+{-# NOINLINE thereafter #-}
+-- thereafter is recursive so it won't inline anyway, but it's better to be
+-- explicit about it.
 
 -- | 'streamFFT' is based off ideas from signal processing, with an optimisation
 --   outlined in <https://www.dsprelated.com/showarticle/776.php this blog post>.
