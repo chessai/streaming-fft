@@ -1,38 +1,50 @@
-name:                streaming-fft
-version:             0.1.0.1
-synopsis:            online streaming fft
+cabal-version: 2.4
+name:
+  streaming-fft
+version:
+  0.2.0.0
+synopsis:
+  online streaming fft
 description:
   online (in input and output) streaming fft algorithm
   that uses a dense-stream optimisation to reduce work
   from /O(n log n)/ to /O(n)/.
-homepage:            https://github.com/chessai/streaming-fft
-license:             BSD3
-license-file:        LICENSE
-author:              chessai
-maintainer:          chessai1996@gmail.com
-category:            Data
-build-type:          Simple
-extra-source-files:  ChangeLog.md
-cabal-version:       >=1.10
-tested-with:
-    GHC == 8.0.2
-  , GHC == 8.2.2
-  , GHC == 8.4.3
-  , GHC == 8.6.3
+homepage:
+  https://github.com/chessai/streaming-fft
+license:
+  BSD-3-Clause
+license-file:
+  LICENSE
+author:
+  chessai
+maintainer:
+  chessai1996@gmail.com
+category:
+  Data, Streaming, Pipes
+build-type:
+  Simple
+extra-source-files:
+  ChangeLog.md
+tested-with: GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.3
 
 library
   exposed-modules:
     Streaming.FFT
-    Streaming.FFT.Internal
     Streaming.FFT.Types
+  other-modules:
+    Prelude
   build-depends:
-      base >=4.9 && <5
-    , contiguous-fft >= 0.2
+    , base-noprelude >=4.9 && <5
+    , contiguous >= 0.3 && < 0.4
+    , contiguous-fft >= 0.2.2 && < 0.3
+    , ghc-prim 
+    , prettyprinter >= 1.2 && < 1.3
     , prim-instances
     , primitive >= 0.6.4 && < 0.7
-    , streaming >= 0.2.2 && < 0.3
-    , contiguous >= 0.3
-    , semirings >= 0.3
+    , refined >= 0.3 && < 0.4
+    , semirings >= 0.3 && < 0.4
+    , streaming >= 0.2 && < 0.3
+    , transformers >= 0.3 && < 0.6
   hs-source-dirs:
     src
   default-language:
